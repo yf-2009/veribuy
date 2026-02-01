@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Veribuy — Beauty shopping without the noise</title>
+  <meta name="description" content="Veribuy helps shoppers compare real prices across retailers, apply verified savings, and make confident choices using clear trust signals." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <header class="nav" role="banner">
+    <div class="nav-inner">
+      <div class="logo">
+        <div class="mark" aria-hidden="true"></div>
+        <div>Veribuy <span class="sublogo">· live demo</span></div>
+      </div>
+
+      <nav class="navlinks" aria-label="Site">
+        <a href="#demo">Demo</a>
+        <a href="#trust">Trust</a>
+        <a href="#roadmap">Roadmap</a>
+        <a class="btn primary" href="#cta" role="button">Judge walkthrough →</a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="wrap" role="main">
+    <section class="hero">
+      <div class="grid-hero">
+        <div class="card pad">
+          <div class="pills">
+            <span class="pill">No paid placement</span>
+            <span class="pill">Live price comparison</span>
+            <span class="pill">Trust signals</span>
+          </div>
+
+          <h1 class="title">
+            Authentic, affordable makeup—<span class="grad">without sponsored noise</span>.
+          </h1>
+
+          <p class="lead">
+            Veribuy helps shoppers compare real prices across retailers, apply verified savings,
+            and make confident choices using clear trust signals and simple filters.
+          </p>
+
+          <div class="hero-actions">
+            <a class="btn primary" href="#demo">Run the live demo</a>
+            <a class="btn" href="#roadmap">See the roadmap</a>
+          </div>
+
+          <div class="kpis">
+            <div class="kpi"><b>Trust-first</b><span>Clear labels + simple flags</span></div>
+            <div class="kpi"><b>Best total cost</b><span>Live seller prices + coupon flow</span></div>
+            <div class="kpi"><b>Expandable</b><span>Makeup now → fashion later</span></div>
+          </div>
+        </div>
+
+        <aside class="card pad">
+          <div class="demo-head">
+            <div>
+              <h3>What works in the demo</h3>
+              <p>Search → live prices → compare sellers → save.</p>
+            </div>
+            <span class="pill">US results</span>
+          </div>
+
+          <div class="panel">
+            <h4>Demo script (30–45s)</h4>
+            <ol class="ol">
+              <li>Type a query (“matte lipstick under $15”)</li>
+              <li>Change max price + sort</li>
+              <li>Open “Compare sellers”</li>
+              <li>Save 1–2 items to Wishlist</li>
+              <li>Apply coupon “VERIBUY5”</li>
+            </ol>
+          </div>
+
+          <div class="panel">
+            <h4>Note</h4>
+            <p class="muted">
+              Live prices come from US shopping results. Coupon verification and price history are demo flows
+              (later integrations).
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+
+    <section id="demo">
+      <div class="section-title">
+        <h2>Live demo: search → compare → save</h2>
+        <p>Type a query. Results update live and can be filtered, compared, saved, and tracked.</p>
+      </div>
+
+      <div class="card pad">
+        <div class="demo-top">
+          <div class="demo-head">
+            <div>
+              <h3>Smart search</h3>
+              <p>Try: “matte lipstick under $15”</p>
+            </div>
+            <div class="status" id="statusPill">Ready</div>
+          </div>
+
+          <div class="searchbar">
+            <label class="sr-only" for="q">Search</label>
+            <input id="q" class="input" type="search" placeholder='Search: “matte lipstick under $15”' />
+            <button class="btn primary" id="btnSearch">Search</button>
+          </div>
+
+          <div class="chips" aria-label="Quick searches">
+            <button class="chip" data-q="matte lipstick under $15">matte lipstick under $15</button>
+            <button class="chip" data-q="foundation for oily skin drugstore">foundation for oily skin</button>
+            <button class="chip" data-q="mascara for volume not clumpy">mascara for volume</button>
+            <button class="chip" data-q="concealer for dark circles no creasing">concealer for dark circles</button>
+          </div>
+        </div>
+
+        <div class="demo-grid">
+          <div class="panel">
+            <h4>Filters</h4>
+
+            <div class="filters">
+              <div class="field">
+                <label for="maxPrice">Max price (USD)</label>
+                <input id="maxPrice" class="input" type="number" min="1" step="1" value="20" />
+              </div>
+
+              <div class="field">
+                <label for="minRating">Min rating</label>
+                <select id="minRating" class="input">
+                  <option value="0">Any</option>
+                  <option value="3.5">3.5+</option>
+                  <option value="4">4.0+</option>
+                  <option value="4.3">4.3+</option>
+                </select>
+              </div>
+
+              <div class="field" style="grid-column:1/-1;">
+                <label>Sort</label>
+                <select id="sortBy" class="input">
+                  <option value="bestValue">Best value</option>
+                  <option value="lowest">Lowest price</option>
+                  <option value="highest">Highest rating</option>
+                  <option value="mostReviews">Most reviews</option>
+                </select>
+              </div>
+
+              <div class="field" style="grid-column:1/-1;">
+                <label>Options</label>
+                <div class="chips">
+                  <label class="chip chk"><input id="strictTrust" type="checkbox" checked /> Stricter trust filters</label>
+                  <label class="chip chk"><input id="preferMajor" type="checkbox" /> Prefer major retailers</label>
+                  <label class="chip chk"><input id="onlySephora" type="checkbox" /> Only Sephora (US)</label>
+                </div>
+              </div>
+            </div>
+
+            <div class="panel mini" style="margin-top:12px;">
+              <h4>Price alert</h4>
+              <div class="alertRow">
+                <input id="alertName" class="input" placeholder="Alert name (e.g., 'Matte lipstick')" />
+                <button class="btn" id="btnSaveAlert">Save</button>
+              </div>
+              <div class="small" id="alertsOut">No alerts saved yet.</div>
+            </div>
+          </div>
+
+          <div class="panel">
+            <div class="panelHead">
+              <h4>Results</h4>
+              <div class="small" id="resultsMeta">0 items</div>
+            </div>
+
+            <div id="results" class="products"></div>
+
+            <details class="details">
+              <summary class="btn">Compare sellers (top 8)</summary>
+              <div class="compareWrap">
+                <table class="table" aria-label="Compare sellers table">
+                  <thead>
+                    <tr>
+                      <th>Seller</th>
+                      <th>Price</th>
+                      <th>Trust</th>
+                      <th>Coupon</th>
+                    </tr>
+                  </thead>
+                  <tbody id="compareBody"></tbody>
+                </table>
+                <p class="small" style="margin-top:10px;">
+                  Live prices are real-time. “Verified coupon” is a demo flow.
+                </p>
+              </div>
+            </details>
+
+            <details class="details">
+              <summary class="btn">Price history (demo)</summary>
+              <div class="compareWrap">
+                <div class="small">Demo history generated from the current live price (real history comes later).</div>
+                <div id="historyOut" style="margin-top:10px;"></div>
+              </div>
+            </details>
+
+            <div class="panel mini" style="margin-top:12px;">
+              <h4>Coupon tester (demo)</h4>
+              <div class="couponRow">
+                <input id="couponCode" class="input" placeholder="Try: VERIBUY5 or WELCOME" />
+                <button class="btn primary" id="btnApplyCoupon">Apply</button>
+              </div>
+              <div class="small" id="couponOut">Enter a code to see verified/unverified behavior.</div>
+            </div>
+
+            <div class="panel mini" style="margin-top:12px;">
+              <h4>Wishlist</h4>
+              <div class="small" id="wishlistOut">No saved items yet.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trust">
+      <div class="section-title">
+        <h2>Trust system: clear signals</h2>
+        <p>We highlight reliability signals with simple, readable labels.</p>
+      </div>
+
+      <div class="cols">
+        <div class="feature">
+          <h3>Review quality checks</h3>
+          <ul>
+            <li>Trust labels + clear flags</li>
+            <li>Stricter mode to reduce low-signal results</li>
+            <li>Improves with verified purchase data (later)</li>
+          </ul>
+        </div>
+        <div class="feature">
+          <h3>Quick product summaries</h3>
+          <ul>
+            <li>Value, longevity, comfort, pigmentation</li>
+            <li>Faster decisions with less scrolling</li>
+            <li>Community votes later</li>
+          </ul>
+        </div>
+        <div class="feature">
+          <h3>Transparent sellers</h3>
+          <ul>
+            <li>Seller/source always shown</li>
+            <li>Affiliate checkout validates demand early</li>
+            <li>Partnership verification later</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="roadmap">
+      <div class="section-title">
+        <h2>Roadmap</h2>
+        <p>Ship the core experience first, then expand as usage grows.</p>
+      </div>
+
+      <div class="timeline">
+        <div class="milestone">
+          <div class="tag">Phase 1 · Now</div>
+          <h3>Core platform</h3>
+          <ul>
+            <li>Live price comparison</li>
+            <li>Seller transparency</li>
+            <li>Wishlist + alerts</li>
+          </ul>
+        </div>
+        <div class="milestone">
+          <div class="tag">Phase 2 · Growth</div>
+          <h3>Personalization + community</h3>
+          <ul>
+            <li>Saved preferences</li>
+            <li>Routines & recommendations</li>
+            <li>Real price history integrations</li>
+          </ul>
+        </div>
+        <div class="milestone">
+          <div class="tag">Phase 3 · Visual tools</div>
+          <h3>Try-on and guided shopping</h3>
+          <ul>
+            <li>Virtual try-on</li>
+            <li>Shade matching</li>
+            <li>Guided assistant</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="cta">
+      <div class="cta">
+        <div>
+          <h3>Competition-ready positioning</h3>
+          <p>Veribuy delivers an honest answer fast: trust + best total cost, then scale into more categories.</p>
+        </div>
+        <div class="ctaBtns">
+          <a class="btn primary" href="#demo">Record the demo</a>
+          <a class="btn" href="#roadmap">Show the roadmap</a>
+        </div>
+      </div>
+
+      <div class="footer">
+        <div>© <span id="y"></span> Veribuy (concept demo) · Built for GWU New Venture Competition</div>
+        <div class="footerPills">
+          <span class="pill">Mobile-first</span>
+          <span class="pill">Fast UI</span>
+          <span class="pill">Clean design</span>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
