@@ -16,7 +16,7 @@ export default async function handler(req, res) {
       url.searchParams.set("q", q);
       url.searchParams.set("hl", "en");
       url.searchParams.set("gl", "us");
-      url.searchParams.set("num", "12");
+      url.searchParams.set("num", "40");
       url.searchParams.set("api_key", apiKey);
   
       const r = await fetch(url.toString());
@@ -27,7 +27,7 @@ export default async function handler(req, res) {
   
       const data = await r.json();
   
-      const items = (data.shopping_results || []).slice(0, 12).map((x) => ({
+      const items = (data.shopping_results || []).slice(0, 40).map((x) => ({
         title: x.title || "Untitled",
         source: x.source || null,
         link: x.link || null,
