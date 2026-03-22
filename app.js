@@ -15,7 +15,7 @@ async function initSupabase() {
     const r = await fetch("/api/config");
 
     if (!r.ok) {
-      console.warn("Supabase config route failed:", r.status);
+      console.warn("Supabase config failed:", r.status);
       supabase = null;
       return;
     }
@@ -23,7 +23,7 @@ async function initSupabase() {
     const cfg = await r.json();
 
     if (!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) {
-      console.warn("Missing Supabase env vars");
+      console.warn("Missing Supabase config values");
       supabase = null;
       return;
     }
