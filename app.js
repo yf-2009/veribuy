@@ -193,7 +193,7 @@ function renderResults() {
             </div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          
+                      
             <button class="btn" data-wish="${idx}">Save</button>
             <button class="btn" data-history="${idx}">History</button>
             <button class="btn" data-reviews="${idx}">See Reviews</button>
@@ -207,16 +207,18 @@ function renderResults() {
       </article>
     `;
   }).join("");
-
-  out.querySelectorAll("[data-wish]").forEach(btn => {
+  
+    out.querySelectorAll("[data-wish]").forEach(btn => {
     btn.addEventListener("click", () => addToWishlist(Number(btn.getAttribute("data-wish"))));
   });
+  
   out.querySelectorAll("[data-history]").forEach(btn => {
     btn.addEventListener("click", () => showHistory(Number(btn.getAttribute("data-history"))));
   });
+  
   out.querySelectorAll("[data-reviews]").forEach(btn => {
-  btn.addEventListener("click", () => showReviews(Number(btn.getAttribute("data-reviews"))));
-});
+    btn.addEventListener("click", () => showReviews(Number(btn.getAttribute("data-reviews"))));
+  });
 }
 
 function renderCompare() {
@@ -413,7 +415,7 @@ function showReviews(filteredIndex) {
       <div style="padding:10px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);">
         <div><b>No reviews yet</b></div>
         <div style="margin-top:4px;">
-          Reviews will appear here once user accounts and commenting are added.
+          Reviews will appear here once commenting is added.
         </div>
       </div>
     </div>
