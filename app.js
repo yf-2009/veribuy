@@ -11,9 +11,28 @@ const state = {
 let supabase = null;
 
 async function initSupabase() {
-  const r = await fetch("/api/config");
-  const cfg = await r.json();
-  supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  try {
+    const r = await fetch("/api/config");
+
+    if (!r.ok) {
+      console.warn("Supabase config route failed:", r.status);
+      supabase = null;
+      return;
+    }
+
+    const cfg = await r.json();
+
+    if (!cfg?.supabaseUrl || !cfg?.supabaseAnonKey) {
+      console.warn("Missing Supabase env vars");
+      supabase = null;
+      return;
+    }
+
+    supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+  } catch (e) {
+    console.warn("Supabase init failed:", e);
+    supabase = null;
+  }
 }
 
 function fmtUSD(n) {
