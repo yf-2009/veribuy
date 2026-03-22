@@ -67,6 +67,11 @@ function safeLink(url, title = "") {
 }
 
 async function signUp() {
+  if (!supabase) {
+    el("authOut").textContent = "Account system not configured yet.";
+    return;
+  }
+
   const email = el("authEmail")?.value.trim();
   const password = el("authPassword")?.value.trim();
 
@@ -80,6 +85,11 @@ async function signUp() {
 }
 
 async function signIn() {
+  if (!supabase) {
+    el("authOut").textContent = "Account system not configured yet.";
+    return;
+  }
+
   const email = el("authEmail")?.value.trim();
   const password = el("authPassword")?.value.trim();
 
@@ -95,6 +105,8 @@ async function signIn() {
 }
 
 async function signOut() {
+  if (!supabase) return;
+
   await supabase.auth.signOut();
   state.wishlist = [];
   renderWishlist();
