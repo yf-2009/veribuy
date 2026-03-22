@@ -710,29 +710,47 @@ async function runSearch(query) {
 }
 
 /* Init */
-function init() {
+async function init() {
   const y = document.getElementById("y");
   if (y) y.textContent = String(new Date().getFullYear());
 
+  await initSupabase();
+
   el("btnSearch")?.addEventListener("click", () => runSearch(el("q").value));
-  el("q")?.addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(el("q").value); });
+  el("q")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runSearch(el("q").value);
+  });
 
   document.querySelectorAll("[data-q]").forEach(btn => {
     btn.addEventListener("click", () => runSearch(btn.getAttribute("data-q")));
   });
 
-  ["maxPrice","minRating","sortBy","strictTrust","preferMajor"].forEach(id => {
+  ["maxPrice","minRating","sortBy","strictTrust","preferMajor","onlySephora"].forEach(id => {
     el(id)?.addEventListener("change", applyFilters);
     el(id)?.addEventListener("input", applyFilters);
   });
 
   el("btnApplyCoupon")?.addEventListener("click", () => applyCoupon(el("couponCode").value));
-  el("couponCode")?.addEventListener("keydown", (e) => { if (e.key === "Enter") applyCoupon(el("couponCode").value); });
+  el("couponCode")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyCoupon(el("couponCode").value);
+  });
 
   el("btnSaveAlert")?.addEventListener("click", saveAlert);
 
+  el("btnSignUp")?.addEventListener("click", signUp);
+  el("btnSignIn")?.addEventListener("click", signIn);
+  el("btnSignOut")?.addEventListener("click", signOut);
+  el("btnSaveSubscription")?.addEventListener("click", saveSubscriptionPreference);
+
+  supabase.auth.onAuthStateChange(async () => {
+    await refreshAuthUI();
+    await loadWishlistFromSupabase();
+  });
+
   renderWishlist();
   renderAlerts();
+  await refreshAuthUI();
+  await loadWishlistFromSupabase();
 
   runSearch("matte lipstick under $15");
 }
