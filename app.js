@@ -10,13 +10,18 @@ const state = {
 
 function fmtUSD(n) {
   if (typeof n !== "number") return "—";
-  return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency: "USD"
+  }).format(n);
 }
 
 function escapeHtml(s) {
   return (s ?? "").toString()
-    .replaceAll("&", "&amp;").replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;").replaceAll('"', "&quot;")
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
 
@@ -24,15 +29,11 @@ function safeLink(url, title = "") {
   if (!url) {
     return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
   }
-
   try {
     const parsed = new URL(url);
-
-    // If SerpAPI/Google gives a google shopping redirect, still allow it
     if (parsed.protocol === "http:" || parsed.protocol === "https:") {
       return parsed.toString();
     }
-
     return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
   } catch {
     return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
@@ -42,14 +43,15 @@ function safeLink(url, title = "") {
 function setStatus(text, tone = "neutral") {
   const pill = el("statusPill");
   if (!pill) return;
+
   pill.textContent = text;
 
   const styles = {
-    neutral: ["rgba(255,255,255,.14)","rgba(255,255,255,.05)","rgba(255,255,255,.70)"],
-    good: ["rgba(54,211,153,.35)","rgba(54,211,153,.10)","rgba(240,255,250,.92)"],
-    warn: ["rgba(251,191,36,.35)","rgba(251,191,36,.10)","rgba(255,250,235,.92)"],
-    bad:  ["rgba(251,113,133,.35)","rgba(251,113,133,.10)","rgba(255,240,244,.92)"]
-  }[tone] || ["rgba(255,255,255,.14)","rgba(255,255,255,.05)","rgba(255,255,255,.70)"];
+    neutral: ["rgba(255,255,255,.14)", "rgba(255,255,255,.05)", "rgba(255,255,255,.70)"],
+    good: ["rgba(54,211,153,.35)", "rgba(54,211,153,.10)", "rgba(240,255,250,.92)"],
+    warn: ["rgba(251,191,36,.35)", "rgba(251,191,36,.10)", "rgba(255,250,235,.92)"],
+    bad: ["rgba(251,113,133,.35)", "rgba(251,113,133,.10)", "rgba(255,240,244,.92)"]
+  }[tone] || ["rgba(255,255,255,.14)", "rgba(255,255,255,.05)", "rgba(255,255,255,.70)"];
 
   pill.style.borderColor = styles[0];
   pill.style.background = styles[1];
@@ -58,7 +60,7 @@ function setStatus(text, tone = "neutral") {
 
 function isMajorRetailer(source) {
   const s = (source || "").toLowerCase();
-  const majors = ["sephora","ulta","target","walmart","amazon","cvs","walgreens","macys","kohls"];
+  const majors = ["sephora", "ulta", "target", "walmart", "amazon", "cvs", "walgreens", "macys", "kohls"];
   return majors.some(m => s.includes(m));
 }
 
@@ -70,19 +72,39 @@ function trustSignal(item, strict = true) {
   const reasons = [];
 
   if (isMajorRetailer(item.source)) score += 10;
-  else { score -= 5; reasons.push("Non-major seller"); }
+  else {
+    score -= 5;
+    reasons.push("Non-major seller");
+  }
 
-  if (!hasRating) { score -= strict ? 12 : 6; reasons.push("No rating signal"); }
+  if (!hasRating) {
+    score -= strict ? 12 : 6;
+    reasons.push("No rating signal");
+  }
 
-  if (reviews === 0) { score -= strict ? 14 : 7; reasons.push("No review count"); }
-  else if (reviews < 20) { score -= strict ? 9 : 5; reasons.push("Low review volume"); }
-  else if (reviews > 300) score += 6;
+  if (reviews === 0) {
+    score -= strict ? 14 : 7;
+    reasons.push("No review count");
+  } else if (reviews < 20) {
+    score -= strict ? 9 : 5;
+    reasons.push("Low review volume");
+  } else if (reviews > 300) {
+    score += 6;
+  }
 
   score = Math.max(0, Math.min(100, score));
 
-  let tag = "Verified", tone = "good";
-  if (score < 70) { tag = "Mixed"; tone = "warn"; }
-  if (score < 55) { tag = "Flagged"; tone = "bad"; }
+  let tag = "Verified";
+  let tone = "good";
+
+  if (score < 70) {
+    tag = "Mixed";
+    tone = "warn";
+  }
+  if (score < 55) {
+    tag = "Flagged";
+    tone = "bad";
+  }
 
   return { score, tag, tone, reasons };
 }
@@ -119,7 +141,6 @@ function applyFilters() {
     if (sortBy === "lowest") return (a.price ?? 999) - (b.price ?? 999);
     if (sortBy === "highest") return (b.rating ?? 0) - (a.rating ?? 0);
     if (sortBy === "mostReviews") return (b.reviews ?? 0) - (a.reviews ?? 0);
-
     return bestValueScore(b, tb) - bestValueScore(a, ta);
   });
 
@@ -150,7 +171,6 @@ function renderResults() {
 
   out.innerHTML = state.filtered.map((it, idx) => {
     const t = trustSignal(it, strict);
-
     const discounted = (state.coupon && typeof it.price === "number")
       ? Math.max(0, it.price - state.coupon.amount)
       : null;
@@ -161,23 +181,25 @@ function renderResults() {
 
     const ratingText = (typeof it.rating === "number") ? `${it.rating.toFixed(1)}★` : "—";
     const reviewsText = (typeof it.reviews === "number") ? `${it.reviews} reviews` : "reviews n/a";
-    const reason = t.reasons?.[0] ? `<span class="badge warn">${escapeHtml(t.reasons[0])}</span>` : `<span class="badge">No flags</span>`;
-    const major = isMajorRetailer(it.source) ? `<span class="badge brand">Major retailer</span>` : `<span class="badge">Marketplace</span>`;
+    const reason = t.reasons?.[0]
+      ? `<span class="badge warn">${escapeHtml(t.reasons[0])}</span>`
+      : `<span class="badge">No flags</span>`;
+
+    const major = isMajorRetailer(it.source)
+      ? `<span class="badge brand">Major retailer</span>`
+      : `<span class="badge">Marketplace</span>`;
 
     const img = it.thumbnail ? `<img alt="" src="${it.thumbnail}" />` : "";
-
     const trustCls = t.tone === "good" ? "good" : t.tone === "warn" ? "warn" : "bad";
 
     return `
       <article class="prod">
         <div class="thumb" aria-hidden="true">${img}</div>
-
         <div>
           <h5>${escapeHtml(it.title)}</h5>
           <div class="meta">
             Source: <b>${escapeHtml(it.source || "Unknown")}</b> · Rating: <b>${ratingText}</b> · ${escapeHtml(reviewsText)}
           </div>
-
           <div class="row">
             <div class="badges">
               <span class="badge ${trustCls}">${t.tag}: ${t.score}/100</span>
@@ -186,42 +208,32 @@ function renderResults() {
             </div>
             ${priceLine}
           </div>
-
           <div class="row" style="margin-top:10px;">
             <div class="small">
               Multi-aspect (demo): Value <b>${aspectScore(t.score, 2)}</b> · Longevity <b>${aspectScore(t.score, 1)}</b> · Comfort <b>${aspectScore(t.score, 3)}</b> · Pigmentation <b>${aspectScore(t.score, 0)}</b>
             </div>
-
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          
-                      
-            <button class="btn" data-wish="${idx}">Save</button>
-            <button class="btn" data-history="${idx}">History</button>
-            <button class="btn" data-reviews="${idx}">See Reviews</button>
-            <a class="btn" href="${safeLink(it.link, it.title)}" target="_blank" rel="noopener noreferrer">View ↗</a>
+              <button class="btn" data-wish="${idx}">Save</button>
+              <button class="btn" data-history="${idx}">History</button>
+              <button class="btn" data-reviews="${idx}">See Reviews</button>
+              <a class="btn" href="${safeLink(it.link, it.title)}" target="_blank" rel="noopener noreferrer">View ↗</a>
+            </div>
           </div>
-          
           <div id="reviews-${idx}" class="small" style="margin-top:10px; display:none;"></div>
-
-          </div>
         </div>
       </article>
     `;
   }).join("");
 
   out.querySelectorAll("[data-wish]").forEach(btn => {
-  
-    out.querySelectorAll("[data-wish]").forEach(btn => {
     btn.addEventListener("click", () => addToWishlist(Number(btn.getAttribute("data-wish"))));
   });
-  
+
   out.querySelectorAll("[data-history]").forEach(btn => {
     btn.addEventListener("click", () => showHistory(Number(btn.getAttribute("data-history"))));
   });
-  
+
   out.querySelectorAll("[data-reviews]").forEach(btn => {
-  btn.addEventListener("click", () => showReviews(Number(btn.getAttribute("data-reviews"))));
-});
     btn.addEventListener("click", () => showReviews(Number(btn.getAttribute("data-reviews"))));
   });
 }
@@ -242,6 +254,7 @@ function renderCompare() {
     const t = trustSignal(it, strict);
     const trustLabel = t.tone === "good" ? "Trusted" : t.tone === "warn" ? "Mixed" : "Flagged";
     const coupon = state.coupon ? (state.coupon.verified ? "Verified applied" : "Unverified") : "—";
+
     return `
       <tr>
         <td><b>${escapeHtml(it.source || "Unknown")}</b></td>
@@ -262,6 +275,7 @@ function addToWishlist(filteredIndex) {
   if (!state.wishlist.some(w => w._k === key)) {
     state.wishlist.unshift({ ...item, _k: key, savedAt: new Date().toISOString() });
   }
+
   renderWishlist();
 }
 
@@ -310,12 +324,13 @@ function applyCoupon(code) {
   }
 
   const rules = {
-    "VERIBUY5": { amount: 0.75, verified: true, msg: "Verified coupon applied (demo)." },
-    "WELCOME":  { amount: 0.50, verified: true, msg: "Verified welcome coupon applied (demo)." },
-    "SAVE10":   { amount: 1.00, verified: false, msg: "Found, but not verified for all sellers (demo)." }
+    VERIBUY5: { amount: 0.75, verified: true, msg: "Verified coupon applied (demo)." },
+    WELCOME: { amount: 0.50, verified: true, msg: "Verified welcome coupon applied (demo)." },
+    SAVE10: { amount: 1.00, verified: false, msg: "Found, but not verified for all sellers (demo)." }
   };
 
   const coupon = rules[c];
+
   if (!coupon) {
     state.coupon = { amount: 0.0, verified: false, code: c };
     out && (out.textContent = `Code "${c}" not found (demo).`);
@@ -336,9 +351,16 @@ function saveAlert() {
   const maxPrice = Number(el("maxPrice")?.value || 999999);
   const minRating = Number(el("minRating")?.value || 0);
   const strict = !!el("strictTrust")?.checked;
-
   const id = (globalThis.crypto?.randomUUID?.() || String(Date.now()));
-  state.alerts.unshift({ id, name, maxPrice, minRating, strict, createdAt: new Date().toISOString() });
+
+  state.alerts.unshift({
+    id,
+    name,
+    maxPrice,
+    minRating,
+    strict,
+    createdAt: new Date().toISOString()
+  });
 
   el("alertName").value = "";
   renderAlerts();
@@ -359,7 +381,13 @@ function renderAlerts() {
   }
 
   out.innerHTML = state.alerts.slice(0, 6).map(a => {
-    const when = new Date(a.createdAt).toLocaleString("en-US", { month:"short", day:"numeric", hour:"2-digit", minute:"2-digit" });
+    const when = new Date(a.createdAt).toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
     return `
       <div style="display:flex; justify-content:space-between; gap:10px; align-items:center; margin:6px 0;">
         <div>
@@ -421,7 +449,6 @@ function showReviews(filteredIndex) {
         <div><b>No reviews yet</b></div>
         <div style="margin-top:4px;">
           Reviews will appear here once user accounts and commenting are added.
-          Reviews will appear here once commenting is added.
         </div>
       </div>
     </div>
@@ -430,9 +457,8 @@ function showReviews(filteredIndex) {
   box.style.display = "block";
 }
 
-
 function generateHistory(currentPrice) {
-  const notes = ["Stable","Small dip","Small rise","Promo week","Low stock","Weekend drop","Restock","Trending"];
+  const notes = ["Stable", "Small dip", "Small rise", "Promo week", "Low stock", "Weekend drop", "Restock", "Trending"];
   const arr = [];
   const today = new Date();
   let p = currentPrice;
@@ -440,16 +466,16 @@ function generateHistory(currentPrice) {
   for (let i = 7; i >= 0; i--) {
     const d = new Date(today);
     d.setDate(d.getDate() - i * 7);
-
     const drift = (Math.random() - 0.5) * 1.8;
     p = Math.max(4, p + drift);
 
     arr.push({
-      date: d.toLocaleDateString("en-US", { month:"short", day:"numeric" }),
+      date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
       price: Number(p.toFixed(2)),
       note: notes[(7 - i) % notes.length]
     });
   }
+
   return arr;
 }
 
@@ -473,7 +499,6 @@ async function runSearch(query) {
 
     state.raw = Array.isArray(data.items) ? data.items : [];
     setStatus(`Live results loaded (${state.raw.length})`, "good");
-
     applyFilters();
   } catch (e) {
     setStatus("Network error", "bad");
@@ -487,25 +512,28 @@ function init() {
   if (y) y.textContent = String(new Date().getFullYear());
 
   el("btnSearch")?.addEventListener("click", () => runSearch(el("q").value));
-  el("q")?.addEventListener("keydown", (e) => { if (e.key === "Enter") runSearch(el("q").value); });
+  el("q")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") runSearch(el("q").value);
+  });
 
   document.querySelectorAll("[data-q]").forEach(btn => {
     btn.addEventListener("click", () => runSearch(btn.getAttribute("data-q")));
   });
 
-  ["maxPrice","minRating","sortBy","strictTrust","preferMajor"].forEach(id => {
+  ["maxPrice", "minRating", "sortBy", "strictTrust", "preferMajor"].forEach(id => {
     el(id)?.addEventListener("change", applyFilters);
     el(id)?.addEventListener("input", applyFilters);
   });
 
   el("btnApplyCoupon")?.addEventListener("click", () => applyCoupon(el("couponCode").value));
-  el("couponCode")?.addEventListener("keydown", (e) => { if (e.key === "Enter") applyCoupon(el("couponCode").value); });
+  el("couponCode")?.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") applyCoupon(el("couponCode").value);
+  });
 
   el("btnSaveAlert")?.addEventListener("click", saveAlert);
 
   renderWishlist();
   renderAlerts();
-
   runSearch("matte lipstick under $15");
 }
 
