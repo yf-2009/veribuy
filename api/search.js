@@ -28,13 +28,10 @@ export default async function handler(req, res) {
       const data = await r.json();
   
       const items = (data.shopping_results || []).slice(0, 40).map((x) => ({
+              
           title: x.title || "Untitled",
           source: x.source || null,
-          link:
-            x.product_link ||
-            x.link ||
-            x.serpapi_link ||
-            null,
+          link: x.product_link || x.link || x.serpapi_link || null,
           thumbnail: x.thumbnail || null,
           price: typeof x.extracted_price === "number" ? x.extracted_price : null,
           priceText: x.price || null,
