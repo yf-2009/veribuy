@@ -47,6 +47,92 @@ function safeLink(url, title = "") {
   }
 }
 
+async function signUp() {
+  const email = el("authEmail")?.value.trim();
+  const password = el("authPassword")?.value.trim();
+
+  if (!email || !password) {
+    el("authOut").textContent = "Enter email and password.";
+    return;
+  }
+
+  const { error } = await supabase.auth.signUp({ email, password });
+  el("authOut").textContent = error ? error.message : "Account created. You can log in now.";
+}
+
+async function signIn() {
+  const email = el("authEmail")?.value.trim();
+  const password = el("authPassword")?.value.trim();
+
+  if (!email || !password) {
+    el("authOut").textContent = "Enter email and password.";
+    return;
+  }
+
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  el("authOut").textContent = error ? error.message : "Logged in.";
+  await refreshAuthUI();
+  await loadWishlistFromSupabase();
+}
+
+async function signOut() {
+  await supabase.auth.signOut();
+  state.wishlist = [];
+  renderWishlist();
+  await refreshAuthUI();
+}
+
+async function getCurrentUser() {
+  const { data } = await supabase.auth.getUser();
+  return data?.user || null;
+}
+
+async function refreshAuthUI() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    el("authOut").textContent = "Not logged in.";
+    if (el("subscribedToggle")) el("subscribedToggle").checked = true;
+    return;
+  }
+
+  el("authOut").textContent = `Logged in as ${user.email}`;
+
+  const { data } = await supabase
+    .from("profiles")
+    .select("subscribed")
+    .eq("id", user.id)
+    .single();
+
+  if (data && el("subscribedToggle")) {
+    el("subscribedToggle").checked = !!data.subscribed;
+  }
+}
+
+async function saveSubscriptionPreference() {
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("Please log in first.");
+    return;
+  }
+
+  const subscribed = !!el("subscribedToggle")?.checked;
+
+  const { error } = await supabase
+    .from("profiles")
+    .update({ subscribed })
+    .eq("id", user.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  el("authOut").textContent = subscribed
+    ? "Subscription preference saved: subscribed."
+    : "Subscription preference saved: unsubscribed.";
+}
+
 function setStatus(text, tone = "neutral") {
   const pill = el("statusPill");
   if (!pill) return;
