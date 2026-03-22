@@ -26,6 +26,28 @@
   </header>
 
   <main class="wrap" role="main">
+    <div class="panel mini" style="margin-bottom:16px;">
+    <h4>Account</h4>
+    <div class="alertRow">
+      <input id="authEmail" class="input" type="email" placeholder="Email" />
+      <input id="authPassword" class="input" type="password" placeholder="Password" />
+    </div>
+    <div class="chips" style="margin-top:10px;">
+      <button class="btn" id="btnSignUp">Sign up</button>
+      <button class="btn primary" id="btnSignIn">Log in</button>
+      <button class="btn" id="btnSignOut">Log out</button>
+    </div>
+    <div class="small" id="authOut">Not logged in.</div>
+    <div class="chips" style="margin-top:10px;">
+      <label class="chip chk">
+        <input id="subscribedToggle" type="checkbox" checked />
+        Receive updates from Veribuy
+      </label>
+      <button class="btn" id="btnSaveSubscription">Save preference</button>
+    </div>
+  </div>
+
+    
     <section class="hero">
       <div class="grid-hero">
         <div class="card pad">
