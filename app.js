@@ -195,6 +195,12 @@ function applyFilters() {
   const preferMajor = !!el("preferMajor")?.checked;
 
   let items = [...state.raw];
+    
+    const onlySephora = !!el("onlySephora")?.checked;
+  if (onlySephora) {
+    items = items.filter(it => (it.source || "").toLowerCase().includes("sephora"));
+  }
+
 
   items = items.filter(it => {
     const pOk = typeof it.price !== "number" ? true : it.price <= maxPrice;
