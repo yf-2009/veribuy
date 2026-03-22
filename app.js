@@ -359,6 +359,37 @@ function removeWishlist(key) {
   renderWishlist();
 }
 
+async function loadWishlistFromSupabase() {
+  const user = await getCurrentUser();
+
+  if (!user) {
+    state.wishlist = [];
+    renderWishlist();
+    return;
+  }
+
+  const { data, error } = await supabase
+    .from("wishlist")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  state.wishlist = (data || []).map(w => ({
+    _k: w.id,
+    title: w.title,
+    source: w.source,
+    link: w.link,
+    thumbnail: w.thumbnail,
+    price: w.price
+  }));
+
+  renderWishlist();
+}
+
 function renderWishlist() {
   const out = el("wishlistOut");
   if (!out) return;
