@@ -20,9 +20,23 @@ function escapeHtml(s) {
     .replaceAll("'", "&#039;");
 }
 
-function safeLink(url) {
-  if (!url) return "#";
-  try { return new URL(url).toString(); } catch { return "#"; }
+function safeLink(url, title = "") {
+  if (!url) {
+    return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
+  }
+
+  try {
+    const parsed = new URL(url);
+
+    // If SerpAPI/Google gives a google shopping redirect, still allow it
+    if (parsed.protocol === "http:" || parsed.protocol === "https:") {
+      return parsed.toString();
+    }
+
+    return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
+  } catch {
+    return `https://www.google.com/search?q=${encodeURIComponent(title)}`;
+  }
 }
 
 function setStatus(text, tone = "neutral") {
