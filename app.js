@@ -343,15 +343,36 @@ function renderCompare() {
 }
 
 /* Wishlist */
-function addToWishlist(filteredIndex) {
+async function addToWishlist(filteredIndex) {
   const item = state.filtered[filteredIndex];
   if (!item) return;
 
-  const key = `${item.title}::${item.source}::${item.price ?? ""}`;
-  if (!state.wishlist.some(w => w._k === key)) {
-    state.wishlist.unshift({ ...item, _k: key, savedAt: new Date().toISOString() });
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("Please log in to save products.");
+    return;
   }
-  renderWishlist();
+
+  const productKey = `${(item.title || "").toLowerCase()}::${(item.source || "").toLowerCase()}`;
+
+  const { error } = await supabase
+    .from("wishlist")
+    .upsert({
+      user_id: user.id,
+      product_key: productKey,
+      title: item.title,
+      source: item.source,
+      link: item.link,
+      thumbnail: item.thumbnail,
+      price: item.price
+    }, { onConflict: "user_id,product_key" });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadWishlistFromSupabase();
 }
 
 function removeWishlist(key) {
