@@ -767,16 +767,21 @@ async function init() {
   el("btnSignOut")?.addEventListener("click", signOut);
   el("btnSaveSubscription")?.addEventListener("click", saveSubscriptionPreference);
 
-  supabase.auth.onAuthStateChange(async () => {
+  if (supabase) {
+    supabase.auth.onAuthStateChange(async () => {
+      await refreshAuthUI();
+      await loadWishlistFromSupabase();
+    });
+
     await refreshAuthUI();
     await loadWishlistFromSupabase();
-  });
+  } else {
+    const authOut = el("authOut");
+    if (authOut) authOut.textContent = "Account system not configured yet.";
+    renderWishlist();
+  }
 
-  renderWishlist();
   renderAlerts();
-  await refreshAuthUI();
-  await loadWishlistFromSupabase();
-
   runSearch("matte lipstick under $15");
 }
 
