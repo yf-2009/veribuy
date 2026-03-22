@@ -621,6 +621,43 @@ async function showReviews(filteredIndex) {
   });
 }
 
+async function submitReview(filteredIndex) {
+  const item = state.filtered[filteredIndex];
+  if (!item) return;
+
+  const user = await getCurrentUser();
+  if (!user) {
+    alert("Please log in to leave a review.");
+    return;
+  }
+
+  const rating = Number(document.getElementById(`review-rating-${filteredIndex}`)?.value || 5);
+  const commentText = document.getElementById(`review-text-${filteredIndex}`)?.value.trim();
+
+  if (!commentText) {
+    alert("Write a review first.");
+    return;
+  }
+
+  const productKey = `${(item.title || "").toLowerCase()}::${(item.source || "").toLowerCase()}`;
+
+  const { error } = await supabase
+    .from("product_reviews")
+    .insert({
+      user_id: user.id,
+      product_key: productKey,
+      product_title: item.title,
+      rating,
+      comment_text: commentText
+    });
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await showReviews(filteredIndex);
+}
 
 function generateHistory(currentPrice) {
   const notes = ["Stable","Small dip","Small rise","Promo week","Low stock","Weekend drop","Restock","Trending"];
