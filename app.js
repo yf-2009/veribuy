@@ -375,9 +375,22 @@ async function addToWishlist(filteredIndex) {
   await loadWishlistFromSupabase();
 }
 
-function removeWishlist(key) {
-  state.wishlist = state.wishlist.filter(w => w._k !== key);
-  renderWishlist();
+async function removeWishlist(key) {
+  const user = await getCurrentUser();
+  if (!user) return;
+
+  const { error } = await supabase
+    .from("wishlist")
+    .delete()
+    .eq("id", key)
+    .eq("user_id", user.id);
+
+  if (error) {
+    alert(error.message);
+    return;
+  }
+
+  await loadWishlistFromSupabase();
 }
 
 async function loadWishlistFromSupabase() {
