@@ -8,6 +8,14 @@ const state = {
   wishlist: []
 };
 
+let supabase = null;
+
+async function initSupabase() {
+  const r = await fetch("/api/config");
+  const cfg = await r.json();
+  supabase = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
+}
+
 function fmtUSD(n) {
   if (typeof n !== "number") return "—";
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(n);
