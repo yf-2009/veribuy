@@ -557,7 +557,7 @@ function showHistory(filteredIndex) {
   if (details) details.open = true;
 }
 
-function showReviews(filteredIndex) {
+async function showReviews(filteredIndex) {
   const item = state.filtered[filteredIndex];
   const box = document.getElementById(`reviews-${filteredIndex}`);
   if (!item || !box) return;
@@ -568,19 +568,57 @@ function showReviews(filteredIndex) {
     return;
   }
 
+  const productKey = `${(item.title || "").toLowerCase()}::${(item.source || "").toLowerCase()}`;
+
+  const { data, error } = await supabase
+    .from("product_reviews")
+    .select("id, user_id, rating, comment_text, created_at")
+    .eq("product_key", productKey)
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    box.innerHTML = `<div class="panel mini">Could not load reviews.</div>`;
+    box.style.display = "block";
+    return;
+  }
+
   box.innerHTML = `
     <div class="panel mini">
       <h4 style="margin-bottom:8px;">Reviews for ${escapeHtml(item.title)}</h4>
-      <div style="padding:10px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);">
-        <div><b>No reviews yet</b></div>
-        <div style="margin-top:4px;">
-          Reviews will appear here once commenting is added.
-        </div>
+
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        <select id="review-rating-${filteredIndex}" class="input" style="max-width:140px;">
+          <option value="5">5 stars</option>
+          <option value="4">4 stars</option>
+          <option value="3">3 stars</option>
+          <option value="2">2 stars</option>
+          <option value="1">1 star</option>
+        </select>
+        <button class="btn" data-submit-review="${filteredIndex}">Post Review</button>
+      </div>
+
+      <textarea id="review-text-${filteredIndex}" class="input" rows="3" placeholder="Write your review here"></textarea>
+
+      <div id="review-list-${filteredIndex}" style="margin-top:12px;">
+        ${
+          (data || []).length
+            ? data.map(r => `
+              <div style="margin-bottom:10px; padding:10px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);">
+                <div><b>${escapeHtml(String(r.rating))}/5</b> · ${new Date(r.created_at).toLocaleDateString()}</div>
+                <div style="margin-top:4px;">${escapeHtml(r.comment_text)}</div>
+              </div>
+            `).join("")
+            : `<div class="small">No reviews yet.</div>`
+        }
       </div>
     </div>
   `;
 
   box.style.display = "block";
+
+  box.querySelector(`[data-submit-review="${filteredIndex}"]`)?.addEventListener("click", async () => {
+    await submitReview(filteredIndex);
+  });
 }
 
 
