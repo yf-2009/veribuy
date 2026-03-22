@@ -195,7 +195,7 @@ function renderResults() {
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
               <button class="btn" data-wish="${idx}">Save</button>
               <button class="btn" data-history="${idx}">History</button>
-              <a class="btn" href="${safeLink(it.link)}" target="_blank" rel="noopener noreferrer">View ↗</a>
+              <a class="btn" href="${safeLink(it.link, it.title)}" target="_blank" rel="noopener noreferrer">View ↗</a>
             </div>
           </div>
         </div>
@@ -271,7 +271,7 @@ function renderWishlist() {
         <div class="small">${escapeHtml(w.source || "Unknown")} · ${fmtUSD(w.price)}</div>
       </div>
       <div style="display:flex; gap:8px;">
-        <a class="btn" href="${safeLink(w.link)}" target="_blank" rel="noopener noreferrer">Open ↗</a>
+        <a class="btn" href="${safeLink(w.link, w.title)}" target="_blank" rel="noopener noreferrer">Open ↗</a>
         <button class="btn" data-rm="${escapeHtml(w._k)}">Remove</button>
       </div>
     </div>
