@@ -193,10 +193,15 @@ function renderResults() {
             </div>
 
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
-              <button class="btn" data-wish="${idx}">Save</button>
-              <button class="btn" data-history="${idx}">History</button>
-              <a class="btn" href="${safeLink(it.link, it.title)}" target="_blank" rel="noopener noreferrer">View ↗</a>
-            </div>
+          
+            <button class="btn" data-wish="${idx}">Save</button>
+            <button class="btn" data-history="${idx}">History</button>
+            <button class="btn" data-reviews="${idx}">See Reviews</button>
+            <a class="btn" href="${safeLink(it.link, it.title)}" target="_blank" rel="noopener noreferrer">View ↗</a>
+          </div>
+          
+          <div id="reviews-${idx}" class="small" style="margin-top:10px; display:none;"></div>
+
           </div>
         </div>
       </article>
@@ -209,6 +214,9 @@ function renderResults() {
   out.querySelectorAll("[data-history]").forEach(btn => {
     btn.addEventListener("click", () => showHistory(Number(btn.getAttribute("data-history"))));
   });
+  out.querySelectorAll("[data-reviews]").forEach(btn => {
+  btn.addEventListener("click", () => showReviews(Number(btn.getAttribute("data-reviews"))));
+});
 }
 
 function renderCompare() {
@@ -387,6 +395,33 @@ function showHistory(filteredIndex) {
   const details = out.closest("details");
   if (details) details.open = true;
 }
+
+function showReviews(filteredIndex) {
+  const item = state.filtered[filteredIndex];
+  const box = document.getElementById(`reviews-${filteredIndex}`);
+  if (!item || !box) return;
+
+  if (box.style.display === "block") {
+    box.style.display = "none";
+    box.innerHTML = "";
+    return;
+  }
+
+  box.innerHTML = `
+    <div class="panel mini">
+      <h4 style="margin-bottom:8px;">Reviews for ${escapeHtml(item.title)}</h4>
+      <div style="padding:10px; border-radius:12px; background:rgba(255,255,255,.04); border:1px solid rgba(255,255,255,.08);">
+        <div><b>No reviews yet</b></div>
+        <div style="margin-top:4px;">
+          Reviews will appear here once user accounts and commenting are added.
+        </div>
+      </div>
+    </div>
+  `;
+
+  box.style.display = "block";
+}
+
 
 function generateHistory(currentPrice) {
   const notes = ["Stable","Small dip","Small rise","Promo week","Low stock","Weekend drop","Restock","Trending"];
